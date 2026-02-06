@@ -12,24 +12,36 @@ export const LLMResponseSchema = z.object({
 
 export type LLMResponse = z.infer<typeof LLMResponseSchema>;
 
-// Gemini Schema for the responseSchema REST parameter — must stay in sync with LLMResponseSchema above.
-// Uses Gemini's schema format (uppercase types, nullable field) not JSON Schema.
-// See https://ai.google.dev/gemini-api/docs/structured-output
-export const llmResponseGeminiSchema = {
-  type: 'OBJECT',
-  properties: {
-    thinking: { type: 'STRING', nullable: true },
-    comments: {
-      type: 'ARRAY',
-      items: {
-        type: 'OBJECT',
-        properties: {
-          quote: { type: 'STRING' },
-          comment: { type: 'STRING' },
-        },
-        required: ['quote', 'comment'],
-      },
-    },
-  },
-  required: ['thinking', 'comments'],
+type GeminiSchema = {
+  type: string;
+  nullable?: boolean;
+  properties?: Record<string, GeminiSchema>;
+  required?: string[];
+  items?: GeminiSchema;
 };
+
+const zodToGeminiSchema = (schema: z.ZodTypeAny): GeminiSchema => {
+  if (schema instanceof z.ZodNullable) {
+    return { ...zodToGeminiSchema(schema.unwrap()), nullable: true };
+  }
+  if (schema instanceof z.ZodString) {
+    return { type: 'STRING' };
+  }
+  if (schema instanceof z.ZodArray) {
+    return { type: 'ARRAY', items: zodToGeminiSchema(schema.element) };
+  }
+  if (schema instanceof z.ZodObject) {
+    const shape = schema.shape;
+    const properties: Record<string, GeminiSchema> = {};
+    const required: string[] = [];
+    for (const [key, value] of Object.entries(shape)) {
+      properties[key] = zodToGeminiSchema(value as z.ZodTypeAny);
+      required.push(key);
+    }
+    return { type: 'OBJECT', properties, required };
+  }
+  throw new Error(`zodToGeminiSchema: unsupported type ${schema.constructor.name}`);
+};
+
+// See https://ai.google.dev/gemini-api/docs/structured-output
+export const llmResponseGeminiSchema = zodToGeminiSchema(LLMResponseSchema);
