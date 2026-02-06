@@ -33,6 +33,7 @@ const Comments = ({ onError, hasApiKey }) => {
   const [activeCommentIndex, setActiveCommentIndex] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [navigatingIndex, setNavigatingIndex] = useState(null);
+  const [debugInfo, setDebugInfo] = useState(null);
   const lastCursorQuoteRef = useRef(null);
   const pendingNavigationQuoteRef = useRef(null);
   const activeCommentRef = useRef(null);
@@ -54,6 +55,12 @@ const Comments = ({ onError, hasApiKey }) => {
         const cursorCtx = await serverFunctions.getCursorContext();
         if (cancelled) return;
         const cursorQuote = findCursorQuote(cursorCtx, allQuotes);
+        setDebugInfo({
+          cursorCtx,
+          cursorQuote,
+          pending: pendingNavigationQuoteRef.current,
+          tick: Date.now(),
+        });
 
         // If we're waiting for the server to reflect a sidebar-initiated
         // cursor move, ignore poll results until the cursor arrives at the
@@ -198,6 +205,23 @@ const Comments = ({ onError, hasApiKey }) => {
             </Paper>
           );
         })
+      )}
+      {debugInfo && comments.length > 0 && (
+        <Typography
+          variant="caption"
+          component="pre"
+          sx={{
+            mt: 2,
+            p: 1,
+            backgroundColor: '#f5f5f5',
+            borderRadius: 1,
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'break-all',
+            fontSize: '0.65rem',
+          }}
+        >
+          {JSON.stringify(debugInfo, null, 2)}
+        </Typography>
       )}
     </Box>
   );
