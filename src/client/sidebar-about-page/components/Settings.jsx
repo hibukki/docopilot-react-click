@@ -4,7 +4,6 @@ import {
   Collapse,
   TextField,
   Box,
-  Paper,
   useTheme,
   Select,
   MenuItem,
@@ -22,31 +21,32 @@ const Settings = ({ onError, hasApiKey, apiKeyVersion, onApiKeySaved }) => {
   const theme = useTheme();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [apiKeyInput, setApiKeyInput] = useState('');
+
   const [promptInput, setPromptInput] = useState('');
-  const [currentPrompt, setCurrentPrompt] = useState('');
+  const [savedPrompt, setSavedPrompt] = useState('');
+  const [isSavingPrompt, setIsSavingPrompt] = useState(false);
+
   const [availableModels, setAvailableModels] = useState([]);
   const [selectedModel, setSelectedModel] = useState('');
-  const [currentModelDisplay, setCurrentModelDisplay] = useState('');
   const [isLoadingModels, setIsLoadingModels] = useState(false);
+  const [isSavingModel, setIsSavingModel] = useState(false);
 
   useEffect(() => {
     serverFunctions
       .getPersistentStorage(STORAGE_KEYS.USER_PROMPT)
-      .then((stored) => setCurrentPrompt(stored || DEFAULT_PROMPT))
+      .then((stored) => {
+        const prompt = stored || DEFAULT_PROMPT;
+        setSavedPrompt(prompt);
+        setPromptInput(prompt);
+      })
       .catch((err) => onError(err));
   }, []);
 
   useEffect(() => {
     serverFunctions
       .getPersistentStorage(STORAGE_KEYS.MODEL)
-      .then((model) => {
-        setCurrentModelDisplay(model || `Default (${DEFAULT_MODEL})`);
-        setSelectedModel(model || '');
-      })
-      .catch((err) => {
-        onError(err);
-        setCurrentModelDisplay('Error fetching model');
-      });
+      .then((model) => setSelectedModel(model || DEFAULT_MODEL))
+      .catch((err) => onError(err));
   }, []);
 
   useEffect(() => {
@@ -75,33 +75,41 @@ const Settings = ({ onError, hasApiKey, apiKeyVersion, onApiKeySaved }) => {
       .catch((err) => onError(err));
   };
 
+  const handleModelChange = (e) => {
+    const model = e.target.value;
+    setSelectedModel(model);
+    setIsSavingModel(true);
+    serverFunctions
+      .setPersistentStorage(STORAGE_KEYS.MODEL, model)
+      .catch((err) => onError(err))
+      .finally(() => setIsSavingModel(false));
+  };
+
   const handleSavePrompt = () => {
+    setIsSavingPrompt(true);
+    const valueToStore = promptInput === DEFAULT_PROMPT ? '' : promptInput;
     serverFunctions
-      .setPersistentStorage(STORAGE_KEYS.USER_PROMPT, promptInput)
-      .then(() => {
-        setCurrentPrompt(promptInput || DEFAULT_PROMPT);
-        setPromptInput('');
-      })
-      .catch((err) => onError(err));
+      .setPersistentStorage(STORAGE_KEYS.USER_PROMPT, valueToStore)
+      .then(() => setSavedPrompt(promptInput))
+      .catch((err) => onError(err))
+      .finally(() => setIsSavingPrompt(false));
   };
 
-  const handleSaveModel = () => {
-    if (!selectedModel) return;
-    serverFunctions
-      .setPersistentStorage(STORAGE_KEYS.MODEL, selectedModel)
-      .then(() => {
-        setCurrentModelDisplay(selectedModel);
-      })
-      .catch((err) => onError(err));
+  const handleCancelPrompt = () => {
+    setPromptInput(savedPrompt);
   };
 
-  const isModelSaveDisabled = () => {
-    if (isLoadingModels || !selectedModel) return true;
-    const currentActiveModel = currentModelDisplay.startsWith('Default')
-      ? ''
-      : currentModelDisplay;
-    return selectedModel === currentActiveModel;
+  const handleUseDefaultPrompt = () => {
+    setPromptInput(DEFAULT_PROMPT);
+    setIsSavingPrompt(true);
+    serverFunctions
+      .setPersistentStorage(STORAGE_KEYS.USER_PROMPT, '')
+      .then(() => setSavedPrompt(DEFAULT_PROMPT))
+      .catch((err) => onError(err))
+      .finally(() => setIsSavingPrompt(false));
   };
+
+  const promptChanged = promptInput !== savedPrompt;
 
   return (
     <>
@@ -160,25 +168,7 @@ const Settings = ({ onError, hasApiKey, apiKeyVersion, onApiKeySaved }) => {
             </Link>
           </Typography>
         </Box>
-        <Box sx={{ mb: 2, pl: 1, pr: 1 }}>
-          <Typography variant="body2" gutterBottom>
-            Custom Prompt
-          </Typography>
-          <TextField
-            fullWidth
-            multiline
-            rows={4}
-            size="small"
-            variant="outlined"
-            placeholder="Enter custom prompt (leave blank for default)"
-            value={promptInput}
-            onChange={(e) => setPromptInput(e.target.value)}
-            sx={{ mb: 1 }}
-          />
-          <Button variant="contained" size="small" onClick={handleSavePrompt}>
-            Save Prompt
-          </Button>
-        </Box>
+
         <Box sx={{ mb: 2, pl: 1, pr: 1 }}>
           <Typography variant="body2" gutterBottom>
             Gemini Model
@@ -190,64 +180,71 @@ const Settings = ({ onError, hasApiKey, apiKeyVersion, onApiKeySaved }) => {
           ) : isLoadingModels ? (
             <CircularProgress size={20} />
           ) : (
-            <FormControl fullWidth size="small" sx={{ mb: 1 }}>
-              <InputLabel id="model-select-label">Select Model</InputLabel>
-              <Select
-                labelId="model-select-label"
-                value={selectedModel}
-                label="Select Model"
-                onChange={(e) => setSelectedModel(e.target.value)}
-              >
-                {availableModels.map((model) => (
-                  <MenuItem key={model.name} value={model.name}>
-                    <Typography variant="caption">
-                      {model.displayName} ({model.name})
-                    </Typography>
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <FormControl fullWidth size="small">
+                <InputLabel id="model-select-label">Select Model</InputLabel>
+                <Select
+                  labelId="model-select-label"
+                  value={selectedModel}
+                  label="Select Model"
+                  onChange={handleModelChange}
+                  disabled={isSavingModel}
+                >
+                  {availableModels.map((model) => (
+                    <MenuItem key={model.name} value={model.name}>
+                      <Typography variant="caption">
+                        {model.displayName} ({model.name})
+                      </Typography>
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              {isSavingModel && <CircularProgress size={16} />}
+            </Box>
           )}
-          <Button
-            variant="contained"
+        </Box>
+
+        <Box sx={{ mb: 2, pl: 1, pr: 1 }}>
+          <Typography variant="body2" gutterBottom>
+            Prompt
+          </Typography>
+          <TextField
+            fullWidth
+            multiline
+            rows={6}
             size="small"
-            onClick={handleSaveModel}
-            disabled={isModelSaveDisabled()}
-          >
-            Save Model
-          </Button>
-        </Box>
-        <Box sx={{ mb: 2, pl: 1, pr: 1 }}>
-          <Typography variant="body2" gutterBottom>
-            Current Active Prompt:
-          </Typography>
-          <Paper
             variant="outlined"
-            sx={{ p: 1, backgroundColor: theme.palette.background.default }}
-          >
-            <Typography
-              variant="caption"
-              sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
+            value={promptInput}
+            onChange={(e) => setPromptInput(e.target.value)}
+            sx={{ mb: 1 }}
+          />
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+            <Button
+              variant="contained"
+              size="small"
+              onClick={handleSavePrompt}
+              disabled={!promptChanged || isSavingPrompt}
+              startIcon={isSavingPrompt ? <CircularProgress size={14} /> : null}
             >
-              {currentPrompt || 'Using default prompt'}
-            </Typography>
-          </Paper>
-        </Box>
-        <Box sx={{ mb: 2, pl: 1, pr: 1 }}>
-          <Typography variant="body2" gutterBottom>
-            Current Active Model:
-          </Typography>
-          <Paper
-            variant="outlined"
-            sx={{ p: 1, backgroundColor: theme.palette.background.default }}
-          >
-            <Typography
-              variant="caption"
-              sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
+              Save
+            </Button>
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={handleCancelPrompt}
+              disabled={!promptChanged}
             >
-              {currentModelDisplay}
-            </Typography>
-          </Paper>
+              Cancel
+            </Button>
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={handleUseDefaultPrompt}
+              disabled={isSavingPrompt}
+            >
+              Use Default
+            </Button>
+          </Box>
         </Box>
       </Collapse>
     </>
