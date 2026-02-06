@@ -1,19 +1,15 @@
 import { getPersistentStorage } from './storage';
-
-// Must match STORAGE_KEYS and DEFAULT_MODEL in client/utils/constants.ts
-const API_KEY_STORAGE_KEY = 'api_key';
-const MODEL_STORAGE_KEY = 'model';
-const DEFAULT_MODEL = 'gemini-2.0-flash-thinking-exp-1219';
+import { STORAGE_KEYS, DEFAULT_MODEL } from '../shared/constants';
 
 export const queryLLM = (prompt: string, schema: object): string => {
-  const apiKey = getPersistentStorage(API_KEY_STORAGE_KEY);
+  const apiKey = getPersistentStorage(STORAGE_KEYS.API_KEY);
   if (!apiKey) {
     throw new Error(
       'Gemini API key not set. Please set it in the sidebar Settings.'
     );
   }
 
-  const model = getPersistentStorage(MODEL_STORAGE_KEY) || DEFAULT_MODEL;
+  const model = getPersistentStorage(STORAGE_KEYS.MODEL) || DEFAULT_MODEL;
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
   const payload = {
@@ -46,7 +42,7 @@ export const queryLLM = (prompt: string, schema: object): string => {
 };
 
 export const listModels = (): { name: string; displayName: string }[] => {
-  const apiKey = getPersistentStorage(API_KEY_STORAGE_KEY);
+  const apiKey = getPersistentStorage(STORAGE_KEYS.API_KEY);
   if (!apiKey) {
     throw new Error('API key must be set to list models.');
   }
