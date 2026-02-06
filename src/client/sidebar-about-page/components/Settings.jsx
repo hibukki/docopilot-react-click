@@ -85,14 +85,18 @@ const Settings = ({ onError, hasApiKey, apiKeyVersion, onApiKeySaved }) => {
       .finally(() => setIsSavingModel(false));
   };
 
-  const handleSavePrompt = () => {
+  const persistPrompt = (valueToStore, displayValue) => {
     setIsSavingPrompt(true);
-    const valueToStore = promptInput === DEFAULT_PROMPT ? '' : promptInput;
     serverFunctions
       .setPersistentStorage(STORAGE_KEYS.USER_PROMPT, valueToStore)
-      .then(() => setSavedPrompt(promptInput))
+      .then(() => setSavedPrompt(displayValue))
       .catch(onError)
       .finally(() => setIsSavingPrompt(false));
+  };
+
+  const handleSavePrompt = () => {
+    const valueToStore = promptInput === DEFAULT_PROMPT ? '' : promptInput;
+    persistPrompt(valueToStore, promptInput);
   };
 
   const handleCancelPrompt = () => {
@@ -101,12 +105,7 @@ const Settings = ({ onError, hasApiKey, apiKeyVersion, onApiKeySaved }) => {
 
   const handleUseDefaultPrompt = () => {
     setPromptInput(DEFAULT_PROMPT);
-    setIsSavingPrompt(true);
-    serverFunctions
-      .setPersistentStorage(STORAGE_KEYS.USER_PROMPT, '')
-      .then(() => setSavedPrompt(DEFAULT_PROMPT))
-      .catch(onError)
-      .finally(() => setIsSavingPrompt(false));
+    persistPrompt('', DEFAULT_PROMPT);
   };
 
   const promptChanged = promptInput !== savedPrompt;
