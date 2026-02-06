@@ -82,10 +82,11 @@ export const moveCursorToQuote = (quote: string) => {
   const doc = DocumentApp.getActiveDocument();
   const body = doc.getBody();
   const rangeElement = body.findText(escapeRegex(quote));
-  if (rangeElement) {
-    const element = rangeElement.getElement();
-    const startOffset = rangeElement.getStartOffset();
-    const position = doc.newPosition(element, startOffset);
-    doc.setCursor(position);
+  if (!rangeElement) {
+    throw new Error(`Quote not found in document: "${quote.slice(0, 80)}"`);
   }
+  const element = rangeElement.getElement();
+  const startOffset = rangeElement.getStartOffset();
+  const position = doc.newPosition(element, startOffset);
+  doc.setCursor(position);
 };
