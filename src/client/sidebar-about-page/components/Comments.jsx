@@ -6,7 +6,7 @@ import {
   Button,
   CircularProgress,
 } from '@mui/material';
-import { alpha } from '@mui/material/styles';
+
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { serverFunctions } from '../../utils/serverFunctions';
 import { STORAGE_KEYS, DEFAULT_PROMPT } from '../../utils/constants';
@@ -23,6 +23,9 @@ const findCursorQuote = (cursorCtx, quotes) => {
   }
   return null;
 };
+
+const COMMENT_BG = '#f0f4f9';
+const COMMENT_BG_HOVER = '#e4e9f0';
 
 const Comments = ({ onError, hasApiKey }) => {
   const theme = useTheme();
@@ -161,41 +164,40 @@ const Comments = ({ onError, hasApiKey }) => {
           Click "Get Comments" to analyze the document.
         </Typography>
       ) : (
-        comments.map((comment, i) => (
-          <Paper
-            key={`${comment.quote}-${i}`}
-            ref={activeCommentIndex === i ? activeCommentRef : null}
-            onClick={() => handleCommentClick(comment, i)}
-            variant="outlined"
-            sx={{
-              p: 1.5,
-              mb: 1,
-              border: '1px solid transparent',
-              borderLeft: `3px solid ${theme.palette.secondary.main}`,
-              borderRadius: theme.shape.borderRadius,
-              cursor: 'pointer',
-              transition:
-                'background-color 0.15s, border-color 0.15s, box-shadow 0.15s',
-              ...(activeCommentIndex === i && {
-                border: `1px solid ${theme.palette.primary.main}`,
-                borderLeftWidth: '3px',
-                borderLeftColor: theme.palette.primary.main,
-                backgroundColor: theme.palette.action.selected,
-              }),
-              '&:hover': {
-                backgroundColor: alpha(theme.palette.secondary.main, 0.06),
-                boxShadow: theme.shadows[1],
-              },
-            }}
-          >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Typography variant="body2" sx={{ flexGrow: 1 }}>
-                {comment.comment}
-              </Typography>
-              {navigatingIndex === i && <CircularProgress size={14} />}
-            </Box>
-          </Paper>
-        ))
+        comments.map((comment, i) => {
+          const isActive = activeCommentIndex === i;
+          return (
+            <Paper
+              key={`${comment.quote}-${i}`}
+              ref={isActive ? activeCommentRef : null}
+              onClick={() => handleCommentClick(comment, i)}
+              elevation={0}
+              sx={{
+                p: 1.5,
+                mb: 1,
+                borderRadius: '8px',
+                cursor: 'pointer',
+                transition: 'background-color 0.15s, box-shadow 0.15s',
+                backgroundColor: isActive
+                  ? theme.palette.background.paper
+                  : COMMENT_BG,
+                boxShadow: isActive ? theme.shadows[3] : 'none',
+                '&:hover': {
+                  backgroundColor: isActive
+                    ? theme.palette.background.paper
+                    : COMMENT_BG_HOVER,
+                },
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Typography variant="body2" sx={{ flexGrow: 1 }}>
+                  {comment.comment}
+                </Typography>
+                {navigatingIndex === i && <CircularProgress size={14} />}
+              </Box>
+            </Paper>
+          );
+        })
       )}
     </Box>
   );
