@@ -1,5 +1,6 @@
 import { getPersistentStorage } from './storage';
 
+// Must match STORAGE_KEYS and DEFAULT_MODEL in client/utils/constants.ts
 const API_KEY_STORAGE_KEY = 'api_key';
 const MODEL_STORAGE_KEY = 'model';
 const DEFAULT_MODEL = 'gemini-2.0-flash-thinking-exp-1219';

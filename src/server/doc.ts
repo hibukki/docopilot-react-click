@@ -49,21 +49,12 @@ export const highlightQuotesInDoc = (
   }
 
   quotesToHighlight.forEach((quote) => {
-    if (
-      quote &&
-      typeof quote === 'string' &&
-      quote.trim() !== '' &&
-      quote !== quoteInFocus
-    ) {
+    if (quote.trim() && quote !== quoteInFocus) {
       applyHighlight(body, quote, HIGHLIGHT_COLOR);
     }
   });
 
-  if (
-    quoteInFocus &&
-    typeof quoteInFocus === 'string' &&
-    quoteInFocus.trim() !== ''
-  ) {
+  if (quoteInFocus?.trim()) {
     applyHighlight(body, quoteInFocus, FOCUSED_HIGHLIGHT_COLOR);
   }
 };

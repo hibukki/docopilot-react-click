@@ -33,8 +33,8 @@ const devServerOptions: ServerOptions = {
 // use key and cert settings only if they are found
 if (existsSync(keyPath) && existsSync(certPath)) {
   devServerOptions.https = {
-    key: readFileSync(resolve(__dirname, './certs/key.pem')),
-    cert: readFileSync(resolve(__dirname, './certs/cert.pem')),
+    key: readFileSync(keyPath),
+    cert: readFileSync(certPath),
   };
 }
 

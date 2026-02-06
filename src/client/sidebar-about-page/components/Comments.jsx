@@ -86,8 +86,8 @@ const Comments = ({ onError }) => {
             sx={{
               p: 1.5,
               mb: 1,
-              borderLeft: `4px solid ${theme.palette.divider}`,
               border: '1px solid transparent',
+              borderLeft: `4px solid ${theme.palette.divider}`,
               borderRadius: theme.shape.borderRadius,
               cursor: 'pointer',
               transition:
