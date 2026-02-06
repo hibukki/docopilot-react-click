@@ -6,6 +6,7 @@ import {
   Button,
   CircularProgress,
 } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { serverFunctions } from '../../utils/serverFunctions';
 import { STORAGE_KEYS, DEFAULT_PROMPT } from '../../utils/constants';
@@ -150,7 +151,7 @@ const Comments = ({ onError, hasApiKey }) => {
           {isLoading ? 'Loading...' : 'Get Comments'}
         </Button>
       </Box>
-      {!hasApiKey && (
+      {hasApiKey === false && (
         <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
           Set your Gemini API key in Settings below to get started.
         </Typography>
@@ -182,7 +183,7 @@ const Comments = ({ onError, hasApiKey }) => {
                 backgroundColor: theme.palette.action.selected,
               }),
               '&:hover': {
-                backgroundColor: theme.palette.custom.secondaryHover,
+                backgroundColor: alpha(theme.palette.secondary.main, 0.06),
                 boxShadow: theme.shadows[1],
               },
             }}

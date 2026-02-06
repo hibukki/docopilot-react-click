@@ -3,9 +3,6 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import Docopilot from './components/Docopilot';
 
-const ERROR_BORDER = '#e8c4bc';
-const SECONDARY_HOVER = 'rgba(199, 92, 58, 0.06)';
-
 const theme = createTheme({
   palette: {
     primary: {
@@ -33,10 +30,6 @@ const theme = createTheme({
       hover: 'rgba(44, 82, 130, 0.06)',
       selected: 'rgba(44, 82, 130, 0.10)',
       focus: 'rgba(44, 82, 130, 0.12)',
-    },
-    custom: {
-      errorBorder: ERROR_BORDER,
-      secondaryHover: SECONDARY_HOVER,
     },
   },
   typography: {

@@ -128,9 +128,9 @@ const Settings = ({ onError, hasApiKey, apiKeyVersion, onApiKeySaved }) => {
           {settingsOpen ? '▾ Settings' : '▸ Settings'}
         </Typography>
         <Chip
-          label={hasApiKey ? 'API key set' : 'No API key'}
+          label={hasApiKey === null ? '...' : hasApiKey ? 'API key set' : 'No API key'}
           size="small"
-          color={hasApiKey ? 'success' : 'warning'}
+          color={hasApiKey === null ? 'default' : hasApiKey ? 'success' : 'warning'}
           variant="outlined"
         />
       </Box>
