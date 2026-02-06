@@ -1,5 +1,5 @@
 import { Typography, Box, Paper, Button, useTheme } from '@mui/material';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { serverFunctions } from '../../utils/serverFunctions';
 import { STORAGE_KEYS } from '../../utils/constants';
 import Settings from './Settings';
@@ -20,16 +20,12 @@ const Docopilot = () => {
     setLastError(null);
   };
 
-  const checkApiKey = useCallback(() => {
+  useEffect(() => {
     serverFunctions
       .getPersistentStorage(STORAGE_KEYS.API_KEY)
       .then((key) => setHasApiKey(!!key))
-      .catch((err) => handleError(err));
+      .catch(handleError);
   }, []);
-
-  useEffect(() => {
-    checkApiKey();
-  }, [checkApiKey]);
 
   const handleApiKeySaved = () => {
     setHasApiKey(true);
