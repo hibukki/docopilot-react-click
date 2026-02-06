@@ -6,7 +6,7 @@ import {
   Button,
   CircularProgress,
 } from '@mui/material';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { serverFunctions } from '../../utils/serverFunctions';
 import { STORAGE_KEYS, DEFAULT_PROMPT } from '../../utils/constants';
 import { LLMResponseSchema, llmResponseGeminiSchema } from '../../utils/llmSchema';
@@ -31,12 +31,18 @@ const Comments = ({ onError, hasApiKey }) => {
   const [navigatingIndex, setNavigatingIndex] = useState(null);
   const lastCursorQuoteRef = useRef(null);
   const activeCommentRef = useRef(null);
+  const allQuotes = useMemo(() => comments.map((c) => c.quote), [comments]);
+
+  useEffect(() => {
+    return () => {
+      serverFunctions.highlightQuotesInDoc([], null).catch(() => {});
+    };
+  }, []);
 
   useEffect(() => {
     if (comments.length === 0) return;
     let cancelled = false;
 
-    const allQuotes = comments.map((c) => c.quote);
     const poll = async () => {
       if (cancelled) return;
       try {
@@ -49,6 +55,7 @@ const Comments = ({ onError, hasApiKey }) => {
             ? comments.findIndex((c) => c.quote === cursorQuote)
             : null;
           setActiveCommentIndex(idx === -1 ? null : idx);
+          if (cancelled) return;
           await serverFunctions.highlightQuotesInDoc(allQuotes, cursorQuote);
         }
       } catch (err) {
@@ -91,8 +98,8 @@ const Comments = ({ onError, hasApiKey }) => {
       setComments(parsed.comments);
       setActiveCommentIndex(null);
 
-      const allQuotes = parsed.comments.map((c) => c.quote);
-      await serverFunctions.highlightQuotesInDoc(allQuotes, null);
+      const newQuotes = parsed.comments.map((c) => c.quote);
+      await serverFunctions.highlightQuotesInDoc(newQuotes, null);
     } catch (err) {
       onError(err);
     } finally {
@@ -104,7 +111,6 @@ const Comments = ({ onError, hasApiKey }) => {
     setActiveCommentIndex(index);
     setNavigatingIndex(index);
     lastCursorQuoteRef.current = comment.quote;
-    const allQuotes = comments.map((c) => c.quote);
     try {
       await serverFunctions.highlightQuotesInDoc(allQuotes, comment.quote);
       await serverFunctions.moveCursorToQuote(comment.quote);
@@ -141,7 +147,7 @@ const Comments = ({ onError, hasApiKey }) => {
       ) : (
         comments.map((comment, i) => (
           <Paper
-            key={i}
+            key={comment.quote}
             ref={activeCommentIndex === i ? activeCommentRef : null}
             onClick={() => handleCommentClick(comment, i)}
             variant="outlined"
