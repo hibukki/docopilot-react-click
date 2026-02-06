@@ -28,10 +28,15 @@ export const queryLLM = (prompt: string, schema: object): string => {
     method: 'post',
     contentType: 'application/json',
     payload: JSON.stringify(payload),
-    muteHttpExceptions: false,
+    muteHttpExceptions: true,
   });
 
-  const jsonResponse = JSON.parse(response.getContentText());
+  const responseText = response.getContentText();
+  if (response.getResponseCode() !== 200) {
+    throw new Error(`Gemini API error ${response.getResponseCode()}: ${responseText}`);
+  }
+
+  const jsonResponse = JSON.parse(responseText);
   if (!jsonResponse.candidates?.length) {
     throw new Error(
       `No response from Gemini (possibly content-filtered): ${response.getContentText()}`

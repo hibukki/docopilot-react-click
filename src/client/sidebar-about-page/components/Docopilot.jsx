@@ -1,10 +1,14 @@
 import { Typography, Box, Paper, Button } from '@mui/material';
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { serverFunctions } from '../../utils/serverFunctions';
+import { STORAGE_KEYS } from '../../utils/constants';
 import Settings from './Settings';
 import Comments from './Comments';
 
 const Docopilot = () => {
   const [lastError, setLastError] = useState(null);
+  const [hasApiKey, setHasApiKey] = useState(false);
+  const [apiKeyVersion, setApiKeyVersion] = useState(0);
 
   const handleError = (error) => {
     console.error('Docopilot caught error:', error);
@@ -13,6 +17,22 @@ const Docopilot = () => {
 
   const clearError = () => {
     setLastError(null);
+  };
+
+  const checkApiKey = useCallback(() => {
+    serverFunctions
+      .getPersistentStorage(STORAGE_KEYS.API_KEY)
+      .then((key) => setHasApiKey(!!key))
+      .catch((err) => handleError(err));
+  }, []);
+
+  useEffect(() => {
+    checkApiKey();
+  }, [checkApiKey]);
+
+  const handleApiKeySaved = () => {
+    setHasApiKey(true);
+    setApiKeyVersion((v) => v + 1);
   };
 
   return (
@@ -24,9 +44,14 @@ const Docopilot = () => {
           Docopilot
         </Typography>
 
-        <Settings onError={handleError} />
+        <Comments onError={handleError} hasApiKey={hasApiKey} />
 
-        <Comments onError={handleError} />
+        <Settings
+          onError={handleError}
+          hasApiKey={hasApiKey}
+          apiKeyVersion={apiKeyVersion}
+          onApiKeySaved={handleApiKeySaved}
+        />
       </Box>
 
       {lastError && (

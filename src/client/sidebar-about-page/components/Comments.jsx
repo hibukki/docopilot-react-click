@@ -9,9 +9,9 @@ import {
 import { useState } from 'react';
 import { serverFunctions } from '../../utils/serverFunctions';
 import { STORAGE_KEYS, DEFAULT_PROMPT } from '../../utils/constants';
-import { LLMResponseSchema, llmResponseJsonSchema } from '../../utils/llmSchema';
+import { LLMResponseSchema, llmResponseGeminiSchema } from '../../utils/llmSchema';
 
-const Comments = ({ onError }) => {
+const Comments = ({ onError, hasApiKey }) => {
   const theme = useTheme();
   const [comments, setComments] = useState([]);
   const [activeCommentIndex, setActiveCommentIndex] = useState(null);
@@ -30,7 +30,7 @@ const Comments = ({ onError }) => {
 
       const rawResponse = await serverFunctions.queryLLM(
         fullPrompt,
-        llmResponseJsonSchema
+        llmResponseGeminiSchema
       );
       const parsed = LLMResponseSchema.parse(JSON.parse(rawResponse));
 
@@ -58,24 +58,27 @@ const Comments = ({ onError }) => {
   };
 
   return (
-    <Box sx={{ mt: 2 }}>
+    <Box sx={{ mt: 1, mb: 2 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-        <Typography variant="subtitle1" sx={{ flexGrow: 1 }}>
-          Comments
-        </Typography>
         <Button
-          variant="outlined"
+          variant="contained"
           size="small"
           onClick={handleGetComments}
-          disabled={isLoading}
+          disabled={isLoading || !hasApiKey}
           startIcon={isLoading ? <CircularProgress size={16} /> : null}
+          sx={{ flexGrow: 1 }}
         >
           {isLoading ? 'Loading...' : 'Get Comments'}
         </Button>
       </Box>
-      {comments.length === 0 ? (
+      {!hasApiKey && (
+        <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
+          Set your Gemini API key in Settings below to get started.
+        </Typography>
+      )}
+      {comments.length === 0 && hasApiKey ? (
         <Typography variant="body2" color="textSecondary">
-          No comments yet. Click "Get Comments" to analyze the document.
+          Click "Get Comments" to analyze the document.
         </Typography>
       ) : (
         comments.map((comment, i) => (

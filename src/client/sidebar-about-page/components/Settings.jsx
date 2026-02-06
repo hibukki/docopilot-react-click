@@ -12,12 +12,13 @@ import {
   InputLabel,
   CircularProgress,
   Link,
+  Chip,
 } from '@mui/material';
 import { useState, useEffect } from 'react';
 import { serverFunctions } from '../../utils/serverFunctions';
 import { STORAGE_KEYS, DEFAULT_MODEL, DEFAULT_PROMPT } from '../../utils/constants';
 
-const Settings = ({ onError }) => {
+const Settings = ({ onError, hasApiKey, apiKeyVersion, onApiKeySaved }) => {
   const theme = useTheme();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [apiKeyInput, setApiKeyInput] = useState('');
@@ -28,28 +29,31 @@ const Settings = ({ onError }) => {
   const [currentModelDisplay, setCurrentModelDisplay] = useState('');
   const [isLoadingModels, setIsLoadingModels] = useState(false);
 
-  const fetchCurrentPrompt = () => {
+  useEffect(() => {
     serverFunctions
       .getPersistentStorage(STORAGE_KEYS.USER_PROMPT)
       .then((stored) => setCurrentPrompt(stored || DEFAULT_PROMPT))
       .catch((err) => onError(err));
-  };
+  }, []);
 
-  const fetchCurrentModel = () => {
+  useEffect(() => {
     serverFunctions
       .getPersistentStorage(STORAGE_KEYS.MODEL)
       .then((model) => {
-        const display = model || `Default (${DEFAULT_MODEL})`;
-        setCurrentModelDisplay(display);
+        setCurrentModelDisplay(model || `Default (${DEFAULT_MODEL})`);
         setSelectedModel(model || '');
       })
       .catch((err) => {
         onError(err);
         setCurrentModelDisplay('Error fetching model');
       });
-  };
+  }, []);
 
-  const fetchAvailableModels = () => {
+  useEffect(() => {
+    if (!hasApiKey) {
+      setAvailableModels([]);
+      return;
+    }
     setIsLoadingModels(true);
     serverFunctions
       .listModels()
@@ -59,25 +63,25 @@ const Settings = ({ onError }) => {
         setAvailableModels([]);
       })
       .finally(() => setIsLoadingModels(false));
-  };
-
-  useEffect(() => {
-    fetchCurrentPrompt();
-    fetchCurrentModel();
-    fetchAvailableModels();
-  }, []);
+  }, [hasApiKey, apiKeyVersion]);
 
   const handleSaveApiKey = () => {
     serverFunctions
       .setPersistentStorage(STORAGE_KEYS.API_KEY, apiKeyInput)
-      .then(() => setApiKeyInput(''))
+      .then(() => {
+        setApiKeyInput('');
+        onApiKeySaved();
+      })
       .catch((err) => onError(err));
   };
 
   const handleSavePrompt = () => {
     serverFunctions
       .setPersistentStorage(STORAGE_KEYS.USER_PROMPT, promptInput)
-      .then(() => fetchCurrentPrompt())
+      .then(() => {
+        setCurrentPrompt(promptInput || DEFAULT_PROMPT);
+        setPromptInput('');
+      })
       .catch((err) => onError(err));
   };
 
@@ -85,7 +89,9 @@ const Settings = ({ onError }) => {
     if (!selectedModel) return;
     serverFunctions
       .setPersistentStorage(STORAGE_KEYS.MODEL, selectedModel)
-      .then(() => fetchCurrentModel())
+      .then(() => {
+        setCurrentModelDisplay(selectedModel);
+      })
       .catch((err) => onError(err));
   };
 
@@ -114,6 +120,12 @@ const Settings = ({ onError }) => {
         <Typography variant="subtitle1">
           {settingsOpen ? '[-] Settings' : '[+] Settings'}
         </Typography>
+        <Chip
+          label={hasApiKey ? 'API key set' : 'No API key'}
+          size="small"
+          color={hasApiKey ? 'success' : 'warning'}
+          variant="outlined"
+        />
       </Box>
       <Collapse in={settingsOpen}>
         <Box sx={{ mb: 2, pl: 1, pr: 1 }}>
@@ -125,7 +137,7 @@ const Settings = ({ onError }) => {
             type="password"
             size="small"
             variant="outlined"
-            placeholder="Enter your Gemini API Key"
+            placeholder={hasApiKey ? 'Key is set (enter new to replace)' : 'Enter your Gemini API Key'}
             value={apiKeyInput}
             onChange={(e) => setApiKeyInput(e.target.value)}
             sx={{ mb: 1 }}
@@ -171,7 +183,11 @@ const Settings = ({ onError }) => {
           <Typography variant="body2" gutterBottom>
             Gemini Model
           </Typography>
-          {isLoadingModels ? (
+          {!hasApiKey ? (
+            <Typography variant="caption" color="textSecondary">
+              Set API key to load available models.
+            </Typography>
+          ) : isLoadingModels ? (
             <CircularProgress size={20} />
           ) : (
             <FormControl fullWidth size="small" sx={{ mb: 1 }}>
