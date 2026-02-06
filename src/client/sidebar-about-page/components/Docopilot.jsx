@@ -1,12 +1,10 @@
 import { Typography, Box, Paper, Button } from '@mui/material';
 import { useState } from 'react';
-import { serverFunctions } from '../../utils/serverFunctions';
 import Settings from './Settings';
 import Comments from './Comments';
 
 const Docopilot = () => {
   const [lastError, setLastError] = useState(null);
-  const [debugResult, setDebugResult] = useState(null);
 
   const handleError = (error) => {
     console.error('Docopilot caught error:', error);
@@ -17,24 +15,6 @@ const Docopilot = () => {
     setLastError(null);
   };
 
-  const handleDebugStorage = async () => {
-    try {
-      const result = await serverFunctions.debugStorage();
-      setDebugResult(result);
-    } catch (err) {
-      setDebugResult(`debugStorage failed: ${err}`);
-    }
-  };
-
-  const handleTestEcho = async () => {
-    try {
-      const result = await serverFunctions.testEcho('hello');
-      setDebugResult(`testEcho returned: ${result}`);
-    } catch (err) {
-      setDebugResult(`testEcho failed: ${err}`);
-    }
-  };
-
   return (
     <Box
       sx={{ p: 2, display: 'flex', flexDirection: 'column', height: '100%' }}
@@ -43,20 +23,6 @@ const Docopilot = () => {
         <Typography variant="h6" gutterBottom>
           Docopilot
         </Typography>
-
-        <Box sx={{ mb: 2, p: 1, border: '1px dashed grey' }}>
-          <Button size="small" variant="outlined" onClick={handleTestEcho} sx={{ mr: 1 }}>
-            Test Echo
-          </Button>
-          <Button size="small" variant="outlined" onClick={handleDebugStorage}>
-            Debug Storage
-          </Button>
-          {debugResult && (
-            <Typography variant="caption" component="pre" sx={{ mt: 1, whiteSpace: 'pre-wrap' }}>
-              {debugResult}
-            </Typography>
-          )}
-        </Box>
 
         <Settings onError={handleError} />
 
