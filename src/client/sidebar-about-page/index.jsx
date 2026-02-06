@@ -3,38 +3,77 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import Docopilot from './components/Docopilot';
 
-// Define a Google-inspired theme
+// Editorial Copilot theme — warm ink tones, serif headings
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#1a73e8', // Google Blue
+      main: '#2c5282', // warm ink blue
     },
     secondary: {
-      main: '#ea4335', // Google Red (can be used for accents)
+      main: '#c75c3a', // muted coral / editor's pen
     },
     background: {
-      default: '#f8f9fa', // Light grey background
-      paper: '#ffffff', // White paper background
+      default: '#faf8f5', // warm off-white, like quality paper
+      paper: '#ffffff',
     },
     text: {
-      primary: '#202124', // Dark grey text
-      secondary: '#5f6368', // Lighter grey text
+      primary: '#1a1a2e', // deep charcoal
+      secondary: '#6b7280', // warm gray
     },
+    divider: '#e8e4df', // soft warm gray
     action: {
-      active: 'rgba(0, 0, 0, 0.54)',
-      hover: 'rgba(0, 0, 0, 0.04)',
-      selected: 'rgba(26, 115, 232, 0.08)', // Light blue for selected/focused
-      disabled: 'rgba(0, 0, 0, 0.26)',
-      disabledBackground: 'rgba(0, 0, 0, 0.12)',
-      focus: 'rgba(26, 115, 232, 0.12)',
+      hover: 'rgba(44, 82, 130, 0.06)',
+      selected: 'rgba(44, 82, 130, 0.10)',
+      focus: 'rgba(44, 82, 130, 0.12)',
     },
   },
   typography: {
-    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
-    // You might want to adjust font sizes, weights etc. here
+    fontFamily: "'Source Sans 3', 'Helvetica Neue', sans-serif",
+    h6: {
+      fontFamily: "'Playfair Display', Georgia, serif",
+      fontWeight: 700,
+    },
+    subtitle1: {
+      fontFamily: "'Playfair Display', Georgia, serif",
+      fontWeight: 600,
+      fontSize: '0.95rem',
+    },
   },
   shape: {
-    borderRadius: 8, // Slightly rounded corners
+    borderRadius: 6,
+  },
+  components: {
+    MuiPaper: {
+      styleOverrides: {
+        outlined: {
+          borderColor: '#e8e4df',
+        },
+      },
+    },
+    MuiButton: {
+      styleOverrides: {
+        containedPrimary: {
+          textTransform: 'none',
+          fontWeight: 600,
+          boxShadow: 'none',
+          '&:hover': { boxShadow: '0 1px 3px rgba(0,0,0,0.12)' },
+        },
+        outlinedPrimary: {
+          textTransform: 'none',
+          fontWeight: 600,
+          borderColor: '#e8e4df',
+        },
+      },
+    },
+    MuiTextField: {
+      styleOverrides: {
+        root: {
+          '& .MuiOutlinedInput-root': {
+            '& fieldset': { borderColor: '#e8e4df' },
+          },
+        },
+      },
+    },
   },
 });
 
