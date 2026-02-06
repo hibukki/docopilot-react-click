@@ -56,7 +56,7 @@ const Docopilot = () => {
             </Button>
           </Box>
           <Typography variant="body2" sx={{ mb: 1 }}>
-            {lastError.message || 'An unknown error occurred'}
+            {lastError.message || String(lastError)}
           </Typography>
           {lastError.stack && (
             <Typography
