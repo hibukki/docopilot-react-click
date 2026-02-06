@@ -28,6 +28,7 @@ const Comments = ({ onError, hasApiKey }) => {
   const [comments, setComments] = useState([]);
   const [activeCommentIndex, setActiveCommentIndex] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [navigatingIndex, setNavigatingIndex] = useState(null);
   const lastCursorQuoteRef = useRef(null);
   const activeCommentRef = useRef(null);
 
@@ -101,6 +102,7 @@ const Comments = ({ onError, hasApiKey }) => {
 
   const handleCommentClick = async (comment, index) => {
     setActiveCommentIndex(index);
+    setNavigatingIndex(index);
     lastCursorQuoteRef.current = comment.quote;
     const allQuotes = comments.map((c) => c.quote);
     try {
@@ -108,6 +110,8 @@ const Comments = ({ onError, hasApiKey }) => {
       await serverFunctions.moveCursorToQuote(comment.quote);
     } catch (err) {
       onError(err);
+    } finally {
+      setNavigatingIndex(null);
     }
   };
 
@@ -162,7 +166,12 @@ const Comments = ({ onError, hasApiKey }) => {
               },
             }}
           >
-            <Typography variant="body2">{comment.comment}</Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant="body2" sx={{ flexGrow: 1 }}>
+                {comment.comment}
+              </Typography>
+              {navigatingIndex === i && <CircularProgress size={14} />}
+            </Box>
           </Paper>
         ))
       )}
