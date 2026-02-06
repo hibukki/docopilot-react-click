@@ -35,12 +35,12 @@ const Comments = ({ onError, hasApiKey }) => {
     if (comments.length === 0) return;
     let cancelled = false;
 
+    const allQuotes = comments.map((c) => c.quote);
     const poll = async () => {
       if (cancelled) return;
       try {
         const cursorCtx = await serverFunctions.getCursorContext();
         if (cancelled) return;
-        const allQuotes = comments.map((c) => c.quote);
         const cursorQuote = findCursorQuote(cursorCtx, allQuotes);
         if (cursorQuote !== lastCursorQuoteRef.current) {
           lastCursorQuoteRef.current = cursorQuote;
@@ -50,7 +50,9 @@ const Comments = ({ onError, hasApiKey }) => {
           setActiveCommentIndex(idx === -1 ? null : idx);
           await serverFunctions.highlightQuotesInDoc(allQuotes, cursorQuote);
         }
-      } catch {}
+      } catch (err) {
+        console.warn('Cursor poll error:', err);
+      }
       if (!cancelled) setTimeout(poll, 1500);
     };
     poll();

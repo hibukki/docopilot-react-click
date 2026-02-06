@@ -26,7 +26,7 @@ const applyHighlight = (
         textElement.setBackgroundColor(start, end, color);
       }
     }
-    searchResult = body.findText(searchText, searchResult);
+    searchResult = body.findText(escapeRegex(searchText), searchResult);
   }
 };
 
@@ -73,6 +73,7 @@ export const getCursorContext = (): { text: string; offset: number } | null => {
     element.getType() === DocumentApp.ElementType.TEXT
       ? element.getParent()
       : element;
+  if (parent.getType() !== DocumentApp.ElementType.PARAGRAPH) return null;
   return { text: parent.asText().getText(), offset };
 };
 
