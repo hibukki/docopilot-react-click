@@ -157,8 +157,8 @@ const Comments = ({ onError, hasApiKey }) => {
                 backgroundColor: theme.palette.action.selected,
               }),
               '&:hover': {
-                backgroundColor: theme.palette.secondary.light,
-                boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+                backgroundColor: theme.palette.custom.secondaryHover,
+                boxShadow: theme.shadows[1],
               },
             }}
           >

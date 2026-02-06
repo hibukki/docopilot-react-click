@@ -1,4 +1,4 @@
-import { Typography, Box, Paper, Button } from '@mui/material';
+import { Typography, Box, Paper, Button, useTheme } from '@mui/material';
 import { useState, useEffect, useCallback } from 'react';
 import { serverFunctions } from '../../utils/serverFunctions';
 import { STORAGE_KEYS } from '../../utils/constants';
@@ -6,6 +6,7 @@ import Settings from './Settings';
 import Comments from './Comments';
 
 const Docopilot = () => {
+  const theme = useTheme();
   const [lastError, setLastError] = useState(null);
   const [hasApiKey, setHasApiKey] = useState(false);
   const [apiKeyVersion, setApiKeyVersion] = useState(0);
@@ -69,8 +70,7 @@ const Docopilot = () => {
             p: 2,
             mt: 2,
             backgroundColor: 'error.light',
-            border: '1px solid',
-            borderColor: 'error.border',
+            border: `1px solid ${theme.palette.custom.errorBorder}`,
             color: 'error.dark',
             maxHeight: '30%',
             overflowY: 'auto',
