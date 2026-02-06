@@ -126,7 +126,7 @@ const Settings = ({ onError, hasApiKey, apiKeyVersion, onApiKeySaved }) => {
         onClick={() => setSettingsOpen(!settingsOpen)}
       >
         <Typography variant="subtitle1">
-          {settingsOpen ? '[-] Settings' : '[+] Settings'}
+          {settingsOpen ? '▾ Settings' : '▸ Settings'}
         </Typography>
         <Chip
           label={hasApiKey ? 'API key set' : 'No API key'}
