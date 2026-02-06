@@ -51,10 +51,15 @@ export const listModels = (): { name: string; displayName: string }[] => {
   const response = UrlFetchApp.fetch(url, {
     method: 'get',
     contentType: 'application/json',
-    muteHttpExceptions: false,
+    muteHttpExceptions: true,
   });
 
-  const jsonResponse = JSON.parse(response.getContentText());
+  const responseText = response.getContentText();
+  if (response.getResponseCode() !== 200) {
+    throw new Error(`Gemini API error ${response.getResponseCode()}: ${responseText}`);
+  }
+
+  const jsonResponse = JSON.parse(responseText);
 
   return jsonResponse.models
     .filter((m: { supportedGenerationMethods: string[] }) =>
