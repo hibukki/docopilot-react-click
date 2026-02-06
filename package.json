@@ -11,7 +11,7 @@
     "dev": "vite",
     "lint": "eslint .",
     "login": "clasp login",
-    "setup": "rimraf .clasp.json && mkdirp dist && clasp create --type docs --title \"My React Project\" --rootDir ./dist && mv ./dist/.clasp.json ./.clasp.json && rimraf dist",
+    "setup": "rm -f .clasp.json && mkdir -p dist && clasp create --type docs --title \"Docopilot\" --rootDir ./dist && mv ./dist/.clasp.json ./.clasp.json && rm -rf dist",
     "open": "clasp open --addon",
     "push": "clasp push",
     "setup:https": "mkdirp certs && mkcert -key-file ./certs/key.pem -cert-file ./certs/cert.pem localhost 127.0.0.1",

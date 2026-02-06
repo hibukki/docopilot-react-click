@@ -12,11 +12,12 @@ export const LLMResponseSchema = z.object({
 
 export type LLMResponse = z.infer<typeof LLMResponseSchema>;
 
-// JSON Schema format for Gemini's responseSchema parameter
+// JSON Schema for Gemini's responseSchema parameter — must stay in sync with LLMResponseSchema above.
+// Nullable via type array per https://ai.google.dev/gemini-api/docs/structured-output
 export const llmResponseJsonSchema = {
   type: 'object',
   properties: {
-    thinking: { type: 'string' },
+    thinking: { type: ['string', 'null'] },
     comments: {
       type: 'array',
       items: {
