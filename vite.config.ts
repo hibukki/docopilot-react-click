@@ -75,8 +75,6 @@ const clientBuildConfig = ({
         external: [
           'react',
           'react-dom',
-          'react-transition-group',
-          'react-bootstrap',
           '@mui/material',
           '@emotion/react',
           '@emotion/styled',
@@ -89,8 +87,6 @@ const clientBuildConfig = ({
           globals: {
             react: 'React',
             'react-dom': 'ReactDOM',
-            'react-transition-group': 'ReactTransitionGroup',
-            'react-bootstrap': 'ReactBootstrap',
             '@mui/material': 'MaterialUI',
             '@emotion/react': 'emotionReact',
             '@emotion/styled': 'emotionStyled',
