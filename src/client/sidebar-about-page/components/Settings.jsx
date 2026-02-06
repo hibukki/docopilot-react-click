@@ -39,14 +39,14 @@ const Settings = ({ onError, hasApiKey, apiKeyVersion, onApiKeySaved }) => {
         setSavedPrompt(prompt);
         setPromptInput(prompt);
       })
-      .catch((err) => onError(err));
+      .catch(onError);
   }, []);
 
   useEffect(() => {
     serverFunctions
       .getPersistentStorage(STORAGE_KEYS.MODEL)
       .then((model) => setSelectedModel(model || DEFAULT_MODEL))
-      .catch((err) => onError(err));
+      .catch(onError);
   }, []);
 
   useEffect(() => {
@@ -72,7 +72,7 @@ const Settings = ({ onError, hasApiKey, apiKeyVersion, onApiKeySaved }) => {
         setApiKeyInput('');
         onApiKeySaved();
       })
-      .catch((err) => onError(err));
+      .catch(onError);
   };
 
   const handleModelChange = (e) => {
@@ -81,7 +81,7 @@ const Settings = ({ onError, hasApiKey, apiKeyVersion, onApiKeySaved }) => {
     setIsSavingModel(true);
     serverFunctions
       .setPersistentStorage(STORAGE_KEYS.MODEL, model)
-      .catch((err) => onError(err))
+      .catch(onError)
       .finally(() => setIsSavingModel(false));
   };
 
@@ -91,7 +91,7 @@ const Settings = ({ onError, hasApiKey, apiKeyVersion, onApiKeySaved }) => {
     serverFunctions
       .setPersistentStorage(STORAGE_KEYS.USER_PROMPT, valueToStore)
       .then(() => setSavedPrompt(promptInput))
-      .catch((err) => onError(err))
+      .catch(onError)
       .finally(() => setIsSavingPrompt(false));
   };
 
@@ -105,7 +105,7 @@ const Settings = ({ onError, hasApiKey, apiKeyVersion, onApiKeySaved }) => {
     serverFunctions
       .setPersistentStorage(STORAGE_KEYS.USER_PROMPT, '')
       .then(() => setSavedPrompt(DEFAULT_PROMPT))
-      .catch((err) => onError(err))
+      .catch(onError)
       .finally(() => setIsSavingPrompt(false));
   };
 
