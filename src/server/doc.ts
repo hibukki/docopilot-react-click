@@ -63,6 +63,19 @@ export const highlightQuotesInDoc = (
   }
 };
 
+export const getCursorContext = (): { text: string; offset: number } | null => {
+  const doc = DocumentApp.getActiveDocument();
+  const cursor = doc.getCursor();
+  if (!cursor) return null;
+  const element = cursor.getElement();
+  const offset = cursor.getOffset();
+  const parent =
+    element.getType() === DocumentApp.ElementType.TEXT
+      ? element.getParent()
+      : element;
+  return { text: parent.asText().getText(), offset };
+};
+
 export const moveCursorToQuote = (quote: string) => {
   const doc = DocumentApp.getActiveDocument();
   const body = doc.getBody();

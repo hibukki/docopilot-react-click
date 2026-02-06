@@ -1,6 +1,6 @@
 import { onOpen, openAboutSidebar } from './ui';
 import { queryLLM, listModels } from './llms';
-import { getDocContent, highlightQuotesInDoc, moveCursorToQuote } from './doc';
+import { getDocContent, highlightQuotesInDoc, moveCursorToQuote, getCursorContext } from './doc';
 import { getPersistentStorage, setPersistentStorage } from './storage';
 
 export {
@@ -11,6 +11,7 @@ export {
   getDocContent,
   highlightQuotesInDoc,
   moveCursorToQuote,
+  getCursorContext,
   getPersistentStorage,
   setPersistentStorage,
 };

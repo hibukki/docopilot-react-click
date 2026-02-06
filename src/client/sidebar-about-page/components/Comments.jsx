@@ -6,16 +6,67 @@ import {
   Button,
   CircularProgress,
 } from '@mui/material';
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { serverFunctions } from '../../utils/serverFunctions';
 import { STORAGE_KEYS, DEFAULT_PROMPT } from '../../utils/constants';
 import { LLMResponseSchema, llmResponseGeminiSchema } from '../../utils/llmSchema';
+
+const findCursorQuote = (cursorCtx, quotes) => {
+  if (!cursorCtx) return null;
+  const { text, offset } = cursorCtx;
+  for (const quote of quotes) {
+    const idx = text.indexOf(quote);
+    if (idx !== -1 && offset >= idx && offset <= idx + quote.length) {
+      return quote;
+    }
+  }
+  return null;
+};
 
 const Comments = ({ onError, hasApiKey }) => {
   const theme = useTheme();
   const [comments, setComments] = useState([]);
   const [activeCommentIndex, setActiveCommentIndex] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const lastCursorQuoteRef = useRef(null);
+  const activeCommentRef = useRef(null);
+
+  useEffect(() => {
+    if (comments.length === 0) return;
+    let cancelled = false;
+
+    const poll = async () => {
+      if (cancelled) return;
+      try {
+        const cursorCtx = await serverFunctions.getCursorContext();
+        if (cancelled) return;
+        const allQuotes = comments.map((c) => c.quote);
+        const cursorQuote = findCursorQuote(cursorCtx, allQuotes);
+        if (cursorQuote !== lastCursorQuoteRef.current) {
+          lastCursorQuoteRef.current = cursorQuote;
+          const idx = cursorQuote
+            ? comments.findIndex((c) => c.quote === cursorQuote)
+            : null;
+          setActiveCommentIndex(idx === -1 ? null : idx);
+          await serverFunctions.highlightQuotesInDoc(allQuotes, cursorQuote);
+        }
+      } catch {}
+      if (!cancelled) setTimeout(poll, 1500);
+    };
+    poll();
+    return () => {
+      cancelled = true;
+    };
+  }, [comments]);
+
+  useEffect(() => {
+    if (activeCommentRef.current) {
+      activeCommentRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+      });
+    }
+  }, [activeCommentIndex]);
 
   const handleGetComments = async () => {
     setIsLoading(true);
@@ -48,6 +99,7 @@ const Comments = ({ onError, hasApiKey }) => {
 
   const handleCommentClick = async (comment, index) => {
     setActiveCommentIndex(index);
+    lastCursorQuoteRef.current = comment.quote;
     const allQuotes = comments.map((c) => c.quote);
     try {
       await serverFunctions.highlightQuotesInDoc(allQuotes, comment.quote);
@@ -84,6 +136,7 @@ const Comments = ({ onError, hasApiKey }) => {
         comments.map((comment, i) => (
           <Paper
             key={i}
+            ref={activeCommentIndex === i ? activeCommentRef : null}
             onClick={() => handleCommentClick(comment, i)}
             variant="outlined"
             sx={{
