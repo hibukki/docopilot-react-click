@@ -30,6 +30,7 @@ const Comments = ({ onError, hasApiKey }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [navigatingIndex, setNavigatingIndex] = useState(null);
   const lastCursorQuoteRef = useRef(null);
+  const pendingNavigationQuoteRef = useRef(null);
   const activeCommentRef = useRef(null);
   const allQuotes = useMemo(() => comments.map((c) => c.quote), [comments]);
 
@@ -49,7 +50,19 @@ const Comments = ({ onError, hasApiKey }) => {
         const cursorCtx = await serverFunctions.getCursorContext();
         if (cancelled) return;
         const cursorQuote = findCursorQuote(cursorCtx, allQuotes);
-        if (cursorQuote !== lastCursorQuoteRef.current) {
+
+        // If we're waiting for the server to reflect a sidebar-initiated
+        // cursor move, ignore poll results until the cursor arrives at the
+        // expected quote.
+        const pendingQuote = pendingNavigationQuoteRef.current;
+        if (pendingQuote) {
+          if (cursorQuote === pendingQuote) {
+            // Server caught up — resume normal polling.
+            pendingNavigationQuoteRef.current = null;
+            lastCursorQuoteRef.current = cursorQuote;
+          }
+          // Either way, don't override activeCommentIndex while pending.
+        } else if (cursorQuote !== lastCursorQuoteRef.current) {
           lastCursorQuoteRef.current = cursorQuote;
           const idx = cursorQuote
             ? comments.findIndex((c) => c.quote === cursorQuote)
@@ -111,10 +124,12 @@ const Comments = ({ onError, hasApiKey }) => {
     setActiveCommentIndex(index);
     setNavigatingIndex(index);
     lastCursorQuoteRef.current = comment.quote;
+    pendingNavigationQuoteRef.current = comment.quote;
     try {
       await serverFunctions.highlightQuotesInDoc(allQuotes, comment.quote);
       await serverFunctions.moveCursorToQuote(comment.quote);
     } catch (err) {
+      pendingNavigationQuoteRef.current = null;
       onError(err);
     } finally {
       setNavigatingIndex(null);
