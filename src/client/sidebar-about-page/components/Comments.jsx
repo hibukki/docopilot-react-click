@@ -163,7 +163,7 @@ const Comments = ({ onError, hasApiKey }) => {
       ) : (
         comments.map((comment, i) => (
           <Paper
-            key={comment.quote}
+            key={`${comment.quote}-${i}`}
             ref={activeCommentIndex === i ? activeCommentRef : null}
             onClick={() => handleCommentClick(comment, i)}
             variant="outlined"

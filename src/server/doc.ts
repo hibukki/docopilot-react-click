@@ -15,7 +15,8 @@ const applyHighlight = (
   searchText: string,
   color: string
 ) => {
-  let searchResult = body.findText(escapeRegex(searchText));
+  const escaped = escapeRegex(searchText);
+  let searchResult = body.findText(escaped);
   while (searchResult) {
     const element = searchResult.getElement();
     if (element.getType() === DocumentApp.ElementType.TEXT) {
@@ -26,7 +27,7 @@ const applyHighlight = (
         textElement.setBackgroundColor(start, end, color);
       }
     }
-    searchResult = body.findText(escapeRegex(searchText), searchResult);
+    searchResult = body.findText(escaped, searchResult);
   }
 };
 
