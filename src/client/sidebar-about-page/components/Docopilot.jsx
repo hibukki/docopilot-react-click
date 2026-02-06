@@ -22,7 +22,16 @@ const Docopilot = () => {
       const result = await serverFunctions.debugStorage();
       setDebugResult(result);
     } catch (err) {
-      setDebugResult(`Call failed: ${err}`);
+      setDebugResult(`debugStorage failed: ${err}`);
+    }
+  };
+
+  const handleTestEcho = async () => {
+    try {
+      const result = await serverFunctions.testEcho('hello');
+      setDebugResult(`testEcho returned: ${result}`);
+    } catch (err) {
+      setDebugResult(`testEcho failed: ${err}`);
     }
   };
 
@@ -36,6 +45,9 @@ const Docopilot = () => {
         </Typography>
 
         <Box sx={{ mb: 2, p: 1, border: '1px dashed grey' }}>
+          <Button size="small" variant="outlined" onClick={handleTestEcho} sx={{ mr: 1 }}>
+            Test Echo
+          </Button>
           <Button size="small" variant="outlined" onClick={handleDebugStorage}>
             Debug Storage
           </Button>

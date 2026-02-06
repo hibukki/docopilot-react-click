@@ -6,8 +6,9 @@ export const getPersistentStorage = (key: string): string | null => {
   }
 };
 
-// Temporary diagnostic — returns result as a string instead of throwing,
-// so GAS can't sanitize the error message.
+// Temporary diagnostics — will be removed once PropertiesService works.
+export const testEcho = (msg: string): string => `Echo: ${msg}`;
+
 export const debugStorage = (): string => {
   const results: string[] = [];
   try {
