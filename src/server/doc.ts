@@ -6,12 +6,16 @@ export const getDocContent = () => {
 const HIGHLIGHT_COLOR = '#FFF8C4';
 const FOCUSED_HIGHLIGHT_COLOR = '#FFD54F';
 
+// GAS findText uses regex, so escape special characters in literal quote strings
+const escapeRegex = (str: string) =>
+  str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 const applyHighlight = (
   body: GoogleAppsScript.Document.Body,
   searchText: string,
   color: string
 ) => {
-  let searchResult = body.findText(searchText);
+  let searchResult = body.findText(escapeRegex(searchText));
   while (searchResult) {
     const element = searchResult.getElement();
     if (element.getType() === DocumentApp.ElementType.TEXT) {
@@ -62,7 +66,7 @@ export const highlightQuotesInDoc = (
 export const moveCursorToQuote = (quote: string) => {
   const doc = DocumentApp.getActiveDocument();
   const body = doc.getBody();
-  const rangeElement = body.findText(quote);
+  const rangeElement = body.findText(escapeRegex(quote));
   if (rangeElement) {
     const element = rangeElement.getElement();
     const startOffset = rangeElement.getStartOffset();

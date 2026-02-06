@@ -32,6 +32,11 @@ export const queryLLM = (prompt: string, schema: object): string => {
   });
 
   const jsonResponse = JSON.parse(response.getContentText());
+  if (!jsonResponse.candidates?.length) {
+    throw new Error(
+      `No response from Gemini (possibly content-filtered): ${response.getContentText()}`
+    );
+  }
   return jsonResponse.candidates[0].content.parts[0].text;
 };
 
