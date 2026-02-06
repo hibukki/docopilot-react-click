@@ -6,7 +6,7 @@ import {
   Button,
   CircularProgress,
 } from '@mui/material';
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { serverFunctions } from '../../utils/serverFunctions';
 import { STORAGE_KEYS, DEFAULT_PROMPT } from '../../utils/constants';
 import { LLMResponseSchema, llmResponseGeminiSchema } from '../../utils/llmSchema';
