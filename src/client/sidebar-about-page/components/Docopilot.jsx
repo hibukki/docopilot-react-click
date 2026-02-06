@@ -40,7 +40,15 @@ const Docopilot = () => {
       sx={{ p: 2, display: 'flex', flexDirection: 'column', height: '100%' }}
     >
       <Box sx={{ flexGrow: 1, overflowY: 'auto' }}>
-        <Typography variant="h6" gutterBottom>
+        <Typography
+          variant="h6"
+          sx={{
+            pb: 1,
+            mb: 1.5,
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+          }}
+        >
           Docopilot
         </Typography>
 
@@ -56,12 +64,14 @@ const Docopilot = () => {
 
       {lastError && (
         <Paper
-          elevation={3}
+          elevation={0}
           sx={{
             p: 2,
             mt: 2,
             backgroundColor: 'error.light',
-            color: 'error.contrastText',
+            border: '1px solid',
+            borderColor: 'error.border',
+            color: 'error.dark',
             maxHeight: '30%',
             overflowY: 'auto',
             flexShrink: 0,

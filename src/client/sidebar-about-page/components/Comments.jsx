@@ -145,21 +145,20 @@ const Comments = ({ onError, hasApiKey }) => {
               p: 1.5,
               mb: 1,
               border: '1px solid transparent',
-              borderLeft: `4px solid ${theme.palette.divider}`,
+              borderLeft: `3px solid ${theme.palette.secondary.main}`,
               borderRadius: theme.shape.borderRadius,
               cursor: 'pointer',
               transition:
-                'transform 0.1s ease-in-out, background-color 0.1s ease-in-out, border 0.1s ease-in-out, box-shadow 0.1s ease-in-out',
+                'background-color 0.15s, border-color 0.15s, box-shadow 0.15s',
               ...(activeCommentIndex === i && {
                 border: `1px solid ${theme.palette.primary.main}`,
-                borderLeftWidth: '4px',
+                borderLeftWidth: '3px',
                 borderLeftColor: theme.palette.primary.main,
                 backgroundColor: theme.palette.action.selected,
               }),
               '&:hover': {
-                backgroundColor: theme.palette.action.hover,
-                transform: 'scale(1.01)',
-                boxShadow: theme.shadows[2],
+                backgroundColor: theme.palette.secondary.light,
+                boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
               },
             }}
           >
